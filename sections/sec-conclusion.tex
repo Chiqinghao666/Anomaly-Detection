@@ -1,0 +1,12 @@
+\section{Limitations}
+
+The reported evidence is concentrated on a single ICEWS14s protocol. The temporal displacement references intentionally resemble the benchmark's time-error construction, so the results support performance under this protocol rather than universal detection of real-world temporal errors. The current missing-error configuration improves ranking and precision but not \fbeta, which indicates that recall-sensitive calibration needs further work. The candidate workflow verifies evidence provenance and explanation faithfulness, but its operational benefit still needs evaluation on longer online streams with distribution shift. Finally, test results were inspected during development. Before a final archival submission, the method and hyperparameters should be frozen and evaluated on a fresh split or an additional dataset not used for iterative design decisions.
+
+\section{Ethical considerations}
+
+This work uses event data and evaluates synthetic anomaly types derived from an established benchmark protocol. The detector should be treated as decision support for data curators, not as an authority on political or social truth. Rule-based explanations can make a system easier to audit, but they can also expose historical biases in the source graph. A deployment should therefore retain human review for rejected or quarantined facts, log the evidence trace, and avoid using anomaly scores to make consequential decisions about people or organizations without independent verification.
+
+\section{Conclusion}
+
+\method extends AnoT with error-aware evidence while preserving its interpretable rule-graph backbone. Role consistency addresses conceptual errors, contrastive temporal-gap rules address time errors, and train-only support rules address missing facts. The typed workflow records how a rule was proposed, checked, and used in a score or explanation. On ICEWS14s, the method produces substantial gains for conceptual and time errors and clarifies the remaining calibration problem for missing errors. The next empirical step is a frozen evaluation on fresh data, together with ablations that measure the marginal value of each evidence channel and the operational value of the audit workflow.
+

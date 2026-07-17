@@ -1,0 +1,38 @@
+\section{Analysis and discussion}
+
+\subsection{Evidence quality follows the error mechanism}
+
+The three channels should not be read as interchangeable feature engineering. They resolve three different ambiguities that remain after normal rule-graph scoring. First, for conceptual errors, pair novelty is too coarse: new entity pairs occur in normal political event streams. The role features ask whether an entity has ever occupied the relevant subject or object role. In the recorded ICEWS14s analysis, the object--relation-unseen indicator is active for $86.1\%$ of conceptual positives but only $17.1\%$ of normal references. This separation is consistent with the simultaneous improvement in Precision, \fbeta, and AUC under the selected role-aware calibration.
+
+Second, a raw temporal gap is not necessarily anomalous. Some relations recur after long intervals, while others do not. The contrastive miner therefore conditions on the predecessor and target atomic rules as well as the interval bucket. Its selected-rule union covers $65.4\%$ of validation time errors and only $3.2\%$ of normal references. The resulting union AUC is $0.811$, before this signal is combined with the AnoT score. The contrastive feature is consequently evidence about a particular context--gap pattern, not a global rule that ``long intervals are anomalous.''
+
+Third, the missing task reverses the usual anomaly semantics. A score should rise when history supports an expected target that is absent, not when history conflicts with a supplied fact. The train-only support graph improves AUC from $0.729$ to $0.822$ and Precision from $0.726$ to $0.751$ relative to AnoT, but the full configuration obtains $0.657$ \fbeta versus $0.658$ for AnoT. The result is useful but qualified: the channel improves ranking and high-confidence selection, whereas the current threshold loses enough recall to erase the \fbeta gain.
+
+\begin{table}[t]
+\centering
+\caption{Diagnostic view of the current ICEWS14s results. Deltas compare CARGO-AnoT against AnoT; values are derived directly from Table~\ref{tab:main-results}.}
+\label{tab:diagnostics}
+\small
+\begin{tabular}{lrrr}
+\toprule
+Error type & $\Delta$ Precision & $\Delta$ \fbeta & $\Delta$ AUC \\
+\midrule
+Conceptual & +0.045 & +0.039 & +0.059 \\
+Time & +0.107 & +0.103 & +0.078 \\
+Missing & +0.025 & -0.001 & +0.093 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{What the agentic layer does and does not claim}
+
+The word ``agentic'' can be misleading if it is used as a synonym for an LLM classifier. It is not one here. The reported candidates are deterministic symbolic, contrastive, conceptual, and missing-support artifacts. The agentic contribution is operational: it makes the transition from candidate to evidence, accepted rule, score contribution, and explanation explicit and checkable. Table~\ref{tab:workflow-audit} provides a concrete example. It shows that the implementation did not retain symbolic candidates simply because they were easy to enumerate. They were proposed, evaluated, and rejected; the accepted time rule file contains only contrastive atomic-gap rules.
+
+This separation also limits the claim. The workflow verifies that an explanation's stated target, historical fact, rule identifier, and gap occur in the stored evidence record. It does not yet establish a user-study measure of explanation usefulness, nor does it show that workflow orchestration alone improves detection metrics. Those are separate empirical questions. Treating provenance and explanation checking as engineering guarantees rather than as unmeasured accuracy gains keeps the paper's claims aligned with the implementation.
+
+\subsection{Failure modes and practical use}
+
+The diagnostic table identifies two practical cautions. A time rule mined from a benchmark perturbation can overfit the perturbation mechanism if its scope is not tested on a fresh split or another dataset. The train--validation--test guards prevent direct label leakage, but they do not erase the risk created by repeated test-set feedback during research iteration. We therefore treat the current ICEWS14s results as the recorded development result and require a frozen rerun on fresh data before archival submission.
+
+The missing-fact result highlights a second caution. AUC, Precision, and \fbeta answer different questions. The current support channel ranks true missing facts above negatives more reliably, but the validation-selected operating threshold is not yet recall-optimal. In a data-curation deployment, the right threshold depends on whether the operator is reviewing a small, high-confidence queue or trying to recover as many omissions as possible. The system should expose this choice rather than presenting a single threshold as universally optimal.
+

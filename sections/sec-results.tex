@@ -1,0 +1,62 @@
+\section{Results}
+
+Table~\ref{tab:main-results} gives the current recorded ICEWS14s results. The strongest gains occur where the evidence matches the error mechanism. Conceptual role evidence improves all three conceptual metrics. Contrastive temporal-gap evidence gives the largest relative improvement for time errors. The complete configuration improves missing-error Precision and AUC over AnoT, but its \fbeta is marginally lower. This is consistent with a calibration trade-off: the missing-support features improve ranking and high-score precision, while the current threshold loses recall.
+
+\begin{table*}[t]
+\centering
+\caption{ICEWS14s test results. Each triplet is Precision / \fbeta / AUC. Bold indicates the better value in a column. CARGO-AnoT denotes the full error-aware configuration executed through the CARGO artifact workflow.}
+\label{tab:main-results}
+\small
+\begin{tabular}{lccc}
+\toprule
+Model & Conceptual errors & Time errors & Missing errors \\
+\midrule
+AnoT & 0.806 / 0.790 / 0.910 & 0.672 / 0.672 / 0.788 & 0.726 / \textbf{0.658} / 0.729 \\
+CARGO-AnoT & \textbf{0.851} / \textbf{0.829} / \textbf{0.969} & \textbf{0.779} / \textbf{0.775} / \textbf{0.866} & \textbf{0.751} / 0.657 / \textbf{0.822} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+The temporal miner itself has strong validation separation. Table~\ref{tab:time-mining} distinguishes discovery from final testing. Training proposes patterns from displaced references, while validation determines whether they remain informative under the evaluation protocol. This separation matters because a rule that merely reproduces the artificial perturbation would not necessarily discriminate the validation time errors.
+
+\begin{table}[t]
+\centering
+\caption{Temporal-gap mining audit on ICEWS14s. The candidate and selected-rule counts are rule artifacts; union statistics are computed on validation.}
+\label{tab:time-mining}
+\small
+\begin{tabular}{lr}
+\toprule
+Quantity & Value \\
+\midrule
+Normal training samples & 25,794 \\
+Displaced training references & 7,654 \\
+Observed patterns & 170,444 \\
+Candidates after training filters & 1,255 \\
+Selected temporal-gap rules & 500 \\
+Validation anomaly hit rate & 0.654 \\
+Validation normal hit rate & 0.032 \\
+Validation union AUC & 0.811 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The candidate workflow also supplies a useful audit of what actually drives the final time model. Table~\ref{tab:workflow-audit} shows that none of the symbolic relation-pair or atomic-rule proposals survived validation under the configured filters. All accepted rules are contrastive atomic-gap rules. This finding is important for interpretation: the gain should be attributed to temporal displacement mining, not to a broad claim that every conflict source helps.
+
+\begin{table}[t]
+\centering
+\caption{Validation audit of the time-error candidate workflow. No LLM-proposed candidates were used in the reported run.}
+\label{tab:workflow-audit}
+\small
+\begin{tabular}{lrr}
+\toprule
+Candidate source and scope & Proposed & Accepted \\
+\midrule
+Symbolic relation pair & 500 & 0 \\
+Symbolic atomic rule & 1,000 & 0 \\
+Contrastive atomic gap & 500 & 500 \\
+\midrule
+Total & 2,000 & 500 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
